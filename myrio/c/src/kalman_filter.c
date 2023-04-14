@@ -21,7 +21,7 @@
  * @param dot_delta     Input of the model
  * 
  * Measurements:
- * @param y[0]      GPS latitude [rad]
+ * @param latitude      GPS latitude [rad]
  * @param longitude     GPS longitude [rad]
  * @param a_y           Accelerometer Y value [m/s²]
  * @param w_x           Accelerometer roll rate (around X axis) [rad/s]
@@ -69,7 +69,7 @@ extern void transform_mat(double *input, double (*matrix)[7]) {
 }
 
 // Transform the GPS measurement (longitude/latitude) into X/Y measurement
-extern void transform_latlog_to_XY_l(double longitude, double latitude, double* X_GPS, double* Y_GPS, double Est_States[7], double GPSflag)
+extern void transform_latlog_to_XY_l(double longitude, double latitude, double* X_GPS, double* Y_GPS, double Est_States[7], double GPSflag, double* zerolat, double* zerolong)
 {
     static bool initializedLatLon = false;
     static double latitude0, longitude0;
@@ -97,6 +97,10 @@ extern void transform_latlog_to_XY_l(double longitude, double latitude, double* 
         *X_GPS = X_GPS_g * cos(Est_States[2]) + Y_GPS_g * sin(Est_States[2]);
         *Y_GPS = -X_GPS_g * sin(Est_States[2]) + Y_GPS_g * cos(Est_States[2]);
     }
+
+        *zerolat = latitude0;
+        *zerolong = longitude0;
+
 }
 
 // Transform from global to local frame
@@ -271,7 +275,7 @@ extern void measurement_update(double Est_States_l_1[7], double dot_delta, doubl
 extern void Kalman_filter(double* X, double* Y, double* Psi, double* roll, double* rollRate, double* delta, double* v, 
                           double dot_delta, double latitude, double longitude, double a_y, double w_x,
                           double w_z, double delta_enc, double speed, double *Kalman_Gain_flat, double *A_d_flat,
-                          double *B_d, double *C_flat, double *D, double reset, double *init,  double GPSflag)
+                          double *B_d, double *C_flat, double *D, double reset, double *init,  double GPSflag, double* zerolat, double* zerolong)
 {
 
     static double Est_States[7];        //Global frame t-1
@@ -326,7 +330,7 @@ extern void Kalman_filter(double* X, double* Y, double* Psi, double* roll, doubl
     double X_GPS;
     double Y_GPS;
 
-    transform_latlog_to_XY_l(longitude, latitude, &X_GPS, &Y_GPS, Est_States, GPSflag);
+    transform_latlog_to_XY_l(longitude, latitude, &X_GPS, &Y_GPS, Est_States, GPSflag, zerolat, zerolong);
 
     // b) Wrap the measurements into an array:
     y[0] = X_GPS;
@@ -338,8 +342,8 @@ extern void Kalman_filter(double* X, double* Y, double* Psi, double* roll, doubl
     y[6] = speed;
 
     // c) Update
-     measurement_update(Est_States_l_1, dot_delta, y, Kalman_Gain, C, D, Est_states_l, GPSflag);
-    //  for (int j = 0; j < 7; j++)
+    measurement_update(Est_States_l_1, dot_delta, y, Kalman_Gain, C, D, Est_states_l, GPSflag);
+    //for (int j = 0; j < 7; j++)
     // {
     // Est_states_l[j] = Est_States_l_1[j];
     // }
