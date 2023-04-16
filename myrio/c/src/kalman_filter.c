@@ -359,5 +359,4 @@ extern void Kalman_filter(double* X, double* Y, double* Psi, double* roll, doubl
     *rollRate = Est_states[4];
     *delta = Est_states[5];
     *v = Est_states[6];
-
- }
+}
