@@ -1,35 +1,31 @@
-#include <stdio.h>
-#include <stdbool.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #define g 9.81;
 
-
 /**
  * Trajectory controller
- * 
+ *
  * Input:
  * @param traj          Trajectory reference [X_ref Y_ref Psi_ref]
  * @param X_est         X position estimated state from kalman filter
  * @param Y_est         Y position estimated state from kalman filter
  * @param Psi_est       Heading estimated state from kalman filter
- * 
+ *
  * Output:
  * @param Roll_ref      Roll reference fot the balance control
- * 
- * Parameters: 
+ *
+ * Parameters:
  * @param bike_params             Gravity parameter     [g lr lf lambda]
  * @param traj_params             Trajectory parameters [k1 k2 e1_max]
  * @param v                       Velocity
- * 
- * 
+ *
+ *
  */
-
-
-// Main function
-
-// extern void trajectory_controller(double *traj_loc, double X_est, double Y_est, double Psi_est, double v, double *bike_params, double *traj_params, double *roll_ref,
+// extern void trajectory_controller(double *traj_loc, double X_est, double Y_est, double Psi_est, double v, double
+// *bike_params, double *traj_params, double *roll_ref,
 //                                     int *closestpoint_idx)
 // {
 //     // unpack parameters
@@ -59,18 +55,19 @@
 //     }
 
 //     // Second point in traj_loc is current selected closest point
-//     closestpoint_idx = 1;   
+//     closestpoint_idx = 1;
 
 //     // Search for closest point (find the closest point going forward, stop when distance increases)
-//     while (pow(X_loc[closestpoint_idx]-X_est,2.0) + pow(Y_loc[closestpoint_idx]-Y_est,2.0) >= 
-//             pow(X_loc[closestpoint_idx+1]-X_est,2.0) + pow(Y_loc[closestpoint_idx+1]-Y_est,2.0) && closestpoint_idx <= size_traj_loc-1)
+//     while (pow(X_loc[closestpoint_idx]-X_est,2.0) + pow(Y_loc[closestpoint_idx]-Y_est,2.0) >=
+//             pow(X_loc[closestpoint_idx+1]-X_est,2.0) + pow(Y_loc[closestpoint_idx+1]-Y_est,2.0) && closestpoint_idx
+//             <= size_traj_loc-1)
 //         {
 //             closestpoint_idx += 1;
 //         }
 
 //     // select same closest point for heading and position error
 //     int closestpoint_heading_idx = closestpoint_idx;
- 
+
 //     // Compute X and Y distance from current location to selected closest point
 //     double dx,dy;
 //     dx = X_est - X_loc[closestpoint_idx];
@@ -78,9 +75,4 @@
 
 //     // Compute difference from current heading and heading reference points
 
-
-
-
-
 // }
-

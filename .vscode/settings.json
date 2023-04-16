@@ -4,5 +4,6 @@
     },
     "cmake.sourceDirectory": "${workspaceFolder}/myrio/c",
     "MarkdownPaste.path": "${fileDirname}/assets",
-    "C_Cpp.errorSquiggles": "disabled"
+    "C_Cpp.errorSquiggles": "disabled",
+    "editor.formatOnSave": true
 }
