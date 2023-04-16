@@ -4,7 +4,7 @@
 #include <string.h>
 
 static unsigned char packetPascalString[256] = {0};
-static mc_values values = {};
+static mc_values values = {0};
 
 /**
  * Argument to bldc_interface_uart_init
