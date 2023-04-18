@@ -52,7 +52,7 @@ extern void transform_mat(double *input, double (*matrix)[7])
  * @author Levi Stevens
  */
 extern void transform_latlog_to_XY_l(double longitude, double latitude, double *X_GPS, double *Y_GPS,
-                                     double Est_States[7], double GPSflag, double *zerolat, double *zerolong)
+                                     double Est_States[7], double GPSflag)
 {
     static bool initializedLatLon = false;
     static double latitude0, longitude0;
@@ -80,9 +80,6 @@ extern void transform_latlog_to_XY_l(double longitude, double latitude, double *
         *X_GPS = X_GPS_g * cos(Est_States[2]) + Y_GPS_g * sin(Est_States[2]);
         *Y_GPS = -X_GPS_g * sin(Est_States[2]) + Y_GPS_g * cos(Est_States[2]);
     }
-
-    *zerolat = latitude0;
-    *zerolong = longitude0;
 }
 
 /**
@@ -310,8 +307,7 @@ extern void measurement_update(double Est_States_l_1[7], double dot_delta, doubl
 extern void Kalman_filter(double *X, double *Y, double *Psi, double *roll, double *rollRate, double *delta, double *v,
                           double dot_delta, double latitude, double longitude, double a_y, double w_x, double w_z,
                           double delta_enc, double speed, double *Kalman_Gain_flat, double *A_d_flat, double *B_d,
-                          double *C_flat, double *D, double reset, double *init, double GPSflag, double *zerolat,
-                          double *zerolong)
+                          double *C_flat, double *D, double reset, double *init, double GPSflag)
 {
 
     static double Est_States[7];     // Global frame t-1
@@ -366,7 +362,7 @@ extern void Kalman_filter(double *X, double *Y, double *Psi, double *roll, doubl
     double X_GPS;
     double Y_GPS;
 
-    transform_latlog_to_XY_l(longitude, latitude, &X_GPS, &Y_GPS, Est_States, GPSflag, zerolat, zerolong);
+    transform_latlog_to_XY_l(longitude, latitude, &X_GPS, &Y_GPS, Est_States, GPSflag);
 
     // b) Wrap the measurements into an array:
     y[0] = X_GPS;
