@@ -15,10 +15,11 @@
  * Parameters:
  * @param Ns                Number of points in the local traj
  */
-extern void trajectory_selector(double *traj, double closest_point, int Ns, double reset, double *traj_loc)
+extern void trajectory_selector(double *traj, int32_t *traj_size_in, double closest_point, int Ns, double reset,
+                                double *traj_loc)
 {
     static double ids;
-    int size_traj = sizeof(traj) / 3; // length of the trajectory
+    int size_traj = traj_size_in[0]; // length of the trajectory
 
     // Initialize the variables in first iteration
     if (reset == 0)
@@ -76,5 +77,8 @@ extern void trajectory_selector(double *traj, double closest_point, int Ns, doub
         }
     }
 
-    // *traj_loc = traj_loc_int;
+    for (int i = 0, i < Ns, i++)
+    {
+        traj_loc[i] = traj_loc_int[i];
+    }
 }
