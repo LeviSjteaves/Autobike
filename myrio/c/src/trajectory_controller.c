@@ -79,35 +79,41 @@ double wrap_angle(double angle)
     return wrapped_angle - M_PI;
 }
 
-extern void trajectory_controller(double *traj_loc, int32_t *traj_size, double X_est, double Y_est, double Psi_est,
+extern void trajectory_controller(double *traj, int32_t *traj_size, double X_est, double Y_est, double Psi_est,
                                   double v, double lr, double lf, double lambda, double k1, double k2, double e1_max,
-                                  double Ad_t, double Bd_t, double C_t, double D_t, double *roll_ref,
-                                  int32_t *closestpoint_idx_out, double *error1, double *error2)
+                                  double Ad_t, double Bd_t, double C_t, double D_t, double *roll_ref, int32_t *closestpoint_idx_out,
+                                  double *e1_out, double *e2_out, double *delta_ref_psi_out, double *lat_err_cont, double *head_err_cont, double reset)
 {
     // Unpack the trajectory
-    int size_traj_loc = traj_size[0]; // length of the trajectory
-    double X_loc[size_traj_loc];
-    double Y_loc[size_traj_loc];
-    double Psi_loc[size_traj_loc];
+    int size_traj = traj_size[0]; // length of the trajectory
+    double X_loc[size_traj];
+    double Y_loc[size_traj];
+    double Psi_loc[size_traj];
     int counter = 0;
 
-    for (int i = 0; i < size_traj_loc; i++)
+    for (int i = 0; i < size_traj; i++)
     {
-        X_loc[counter] = traj_loc[i];
-        Y_loc[counter] = traj_loc[i + size_traj_loc];
-        Psi_loc[counter] = traj_loc[i + 2 * size_traj_loc];
+        X_loc[counter] = traj[i];
+        Y_loc[counter] = traj[i + size_traj];
+        Psi_loc[counter] = traj[i + 2 * size_traj];
         counter += 1;
     }
 
-    // Second point in traj_loc is current selected closest point
-    int closestpoint_idx = 1;
+    // Second point in traj is current selected closest point
+    static int closestpoint_idx;
+    if (reset == 0)
+    {
+        closestpoint_idx = 1;
+        *closestpoint_idx_out = 0;
+    }
 
     // Search for closest point (find the closest point going forward, stop when distance increases)
     while (pow(X_loc[closestpoint_idx] - X_est, 2.0) + pow(Y_loc[closestpoint_idx] - Y_est, 2.0) >=
-               pow(X_loc[closestpoint_idx + 1] - X_est, 2.0) + pow(Y_loc[closestpoint_idx + 1] - Y_est, 2.0) &&
-           closestpoint_idx <= size_traj_loc - 2)
+           pow(X_loc[closestpoint_idx + 1] - X_est, 2.0) + pow(Y_loc[closestpoint_idx + 1] - Y_est, 2.0) &&
+           closestpoint_idx <= size_traj - 2)
     {
         closestpoint_idx += 1;
+        // closestpoint_idx = 5;
     }
 
     // select same closest point for heading and position error
@@ -162,9 +168,6 @@ extern void trajectory_controller(double *traj_loc, int32_t *traj_size, double X
     // Keep heading error between -pi and pi
     e2 = wrap_angle(e2);
 
-    *error1 = e1;
-    *error2 = e2;
-
     // Compute time between psiref(idx) and psiref(idx+1)
     double dX = X_loc[closestpoint_idx + 1] - ref_X;
     double dY = Y_loc[closestpoint_idx + 1] - ref_Y;
@@ -175,8 +178,8 @@ extern void trajectory_controller(double *traj_loc, int32_t *traj_size, double X
     // Sample dpsiref
     double dpsiref = D_psiref / Ts_psi;
 
-    // Reset closespoint index as feedback for local selection
-    closestpoint_idx = closestpoint_idx - 1;
+    // // Reset closespoint index as feedback for local selection
+    // *closestpoint_idx_out = 0;
     *closestpoint_idx_out = closestpoint_idx;
 
     // Steering contribution from trajectory error
@@ -207,6 +210,11 @@ extern void trajectory_controller(double *traj_loc, int32_t *traj_size, double X
     // Transform steering reference into roll reference for the balance control
     double eff_delta_ref = delta_ref * sin(lambda);
     *roll_ref = -1 * atan(tan(eff_delta_ref) * (pow(v, 2.0) / (lr + lf)) / g);
-    // *roll_ref = size_traj_loc;
-    // *closestpoint_idx_out = 2;
+
+    // Output different variables that will give us important info for validation
+    *e1_out = e1;
+    *e2_out = e2;
+    *delta_ref_psi_out = delta_ref_psi;
+    *lat_err_cont = -k1 * sign(e1) * min(fabs(e1), e1_max);
+    *head_err_cont = - k2 * e2;
 }

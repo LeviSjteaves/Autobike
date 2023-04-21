@@ -65,13 +65,18 @@ extern void transform_latlog_to_XY_l(double longitude, double latitude, double *
     useLastValueIfNaN(&latitude, &lastLatitude);
     useLastValueIfNaN(&longitude, &lastLongitude);
 
-    if (!initializedLatLon && !isnan(latitude) && !isnan(longitude) && GPSflag > 100)
-    {
-        latitude0 = latitude;
-        longitude0 = longitude;
+    // if (!initializedLatLon && !isnan(latitude) && !isnan(longitude) && GPSflag > 25)
+    // { 
+    //     latitude0 = 0;
+    //     longitude0 = 0;
 
-        initializedLatLon = true;
-    }
+    //     initializedLatLon = true;
+    // }
+
+    latitude0 = 0;
+    longitude0 = 0;
+    initializedLatLon = true;
+
     if (initializedLatLon)
     {
         X_GPS_g = RADIUS_OF_THE_EARTH * (longitude - longitude0) * cos(latitude0);
@@ -166,7 +171,7 @@ extern void measurement_update(double Est_States_l_1[7], double dot_delta, doubl
     double result3 = 0;
     static double GPSflag_1 = 0;
 
-    if (GPSflag_1 != GPSflag && GPSflag > 100) // Update with GPS
+    if (GPSflag_1 != GPSflag && GPSflag > 50) // Update with GPS
     {
         // C*x
         for (int i = 0; i < 7; i++)
@@ -267,6 +272,18 @@ extern void measurement_update(double Est_States_l_1[7], double dot_delta, doubl
     //     Est_states_l[z] = Est_States_l_1[z] + result3;
     // }
 }
+
+// Wrap angle between pi and -pi
+double wrap_angle(double angle)
+{
+    double wrapped_angle = fmod(angle + M_PI, 2 * M_PI);
+    if (wrapped_angle < 0)
+    {
+        wrapped_angle += 2 * M_PI;
+    }
+    return wrapped_angle - M_PI;
+}
+
 
 /**
  * State estimator using a Kalman filter
@@ -382,6 +399,9 @@ extern void Kalman_filter(double *X, double *Y, double *Psi, double *roll, doubl
 
     // 4. Transform estimated states at time t to global frame
     transform_local_to_global(Est_states_l, Est_States, Est_states);
+
+    // Heading angle between pi and -pi
+    Est_states[2] = wrap_angle(Est_states[2]);
 
     // Output the estimated states
     *X = Est_states[0];

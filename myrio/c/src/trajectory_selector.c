@@ -77,7 +77,7 @@ extern void trajectory_selector(double *traj, int32_t *traj_size_in, double clos
         }
     }
 
-    for (int i = 0, i < Ns, i++)
+    for (int i = 0; i < Ns; i++)
     {
         traj_loc[i] = traj_loc_int[i];
     }
