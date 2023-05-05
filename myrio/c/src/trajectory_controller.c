@@ -110,7 +110,7 @@ extern void trajectory_controller(double *traj, int32_t *traj_size, double X_est
     // Search for closest point (find the closest point going forward, stop when distance increases)
     while (pow(X_loc[closestpoint_idx] - X_est, 2.0) + pow(Y_loc[closestpoint_idx] - Y_est, 2.0) >=
            pow(X_loc[closestpoint_idx + 1] - X_est, 2.0) + pow(Y_loc[closestpoint_idx + 1] - Y_est, 2.0) &&
-           closestpoint_idx <= size_traj - 2)
+           closestpoint_idx <= size_traj - 3)
     {
         closestpoint_idx += 1;
         // closestpoint_idx = 5;
@@ -210,6 +210,12 @@ extern void trajectory_controller(double *traj, int32_t *traj_size, double X_est
     // Transform steering reference into roll reference for the balance control
     double eff_delta_ref = delta_ref * sin(lambda);
     *roll_ref = -1 * atan(tan(eff_delta_ref) * (pow(v, 2.0) / (lr + lf)) / g);
+
+    // // Constant roll ref to make a circle when we get close to the end of the trajectory
+    // if (closestpoint_idx > size_traj-10)
+    // {
+    //     *roll_ref = 0;
+    // }
 
     // Output different variables that will give us important info for validation
     *e1_out = e1;
